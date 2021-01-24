@@ -31,30 +31,28 @@ class Client:
         self.telegram = []
         self.crc_data = ''
 
-        # Logger configuration
-        self.logger = None
-
         # Initialise local variables
         self.power = 0.0
         self.energy = 0.0
         self.retries = 3
         self.retry_delay = 10
 
-    def attach_logger(self, logger):
-        self.logger = logger
+        # Report to user
+        print('Serial port configured on \'%s\' with baudrate \'%d\'' % (self.ser.port, self.ser.baudrate))
 
     def open_port(self):
         try:
             self.ser.open()
         except serial.SerialException as e:
-            if self.logger:
-                self.logger.error('Failed to open serial port \'%s\' [\'%s\'' % (self.ser.port, str(e)))
+            print('Failed to open serial port \'%s\' [\'%s\'' % (self.ser.port, str(e)))
             return False
         else:
+            print('Successfully opened serial port')
             return True
 
     def close_port(self):
         self.ser.close()
+        print('Serial port closed')
 
     def read_line(self):
         line = self.ser.readline().decode('ascii')
@@ -66,6 +64,7 @@ class Client:
             self.crc_data += line
 
     def new_telegram(self):
+        print('Start of new telegram detected')
         self.telegram.clear()
         self.crc_data = ''
 
@@ -123,10 +122,14 @@ class Client:
 
                 # Verify CRC
                 if self.verify_crc():
+                    print('Telegram CRC verified correct')
                     self.process_telegram()
                     return True
+                else:
+                    print('Telegram CRC not correct; retrying... (%d of %d)' % (itt, self.retries))
             else:
                 sleep(self.retry_delay)
 
         # Failed to read after self.retries retries
+        print('Failed to receive telegram with correct CRC')
         return False
