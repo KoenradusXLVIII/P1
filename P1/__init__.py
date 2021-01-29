@@ -64,7 +64,8 @@ class Client:
 
     def add_line_to_telegram(self, line):
         self.telegram.append(line.strip())
-        self.crc_data += line
+        if not line.startswith('!'):
+            self.crc_data += line
 
     def new_telegram(self):
         print('Start of new telegram detected')
