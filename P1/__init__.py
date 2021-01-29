@@ -121,7 +121,7 @@ class Client:
 
                 # Store serial if not yet initialized
                 if not self.serial:
-                    self.serial = self.telegram[line][1:].upper()
+                    self.serial = line[1:].upper()
 
                 # Start of transmission detected
                 self.new_telegram()
